@@ -1,0 +1,31 @@
+# env / secrets — NEVER commit real env files. The template lives in .env.example.
+.env
+.env.*
+!.env.example
+
+# dependencies
+node_modules/
+
+# build outputs
+dist/
+.next/
+out/
+build/
+
+# turbo
+.turbo/
+
+# typescript
+*.tsbuildinfo
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# os
+.DS_Store
+
+# editor
+.vscode/
+.idea/
