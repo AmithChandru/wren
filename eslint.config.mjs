@@ -14,5 +14,15 @@ export default tseslint.config(
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    rules: {
+      // Allow intentionally-unused args/vars prefixed with `_` (e.g. the `_next`
+      // param required to keep Express error middleware at 4-arg arity).
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
+    },
+  },
   prettier,
 );
