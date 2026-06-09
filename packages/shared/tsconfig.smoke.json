@@ -1,0 +1,11 @@
+{
+  // Type-checks the Phase 3 smoke script, which lives outside `src` (and so
+  // outside the main build's rootDir). Checked by the `typecheck` script; never
+  // emitted — the script runs via tsx, not the compiled output.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["scripts/smoke.ts"]
+}

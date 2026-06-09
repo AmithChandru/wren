@@ -1,7 +1,17 @@
 /**
- * @wren/shared — colocated cross-workspace types and provider interfaces.
+ * @wren/shared — browser-safe barrel of cross-workspace types.
  *
- * Phase 0: trivial export so the package compiles. Provider interfaces
- * (LLM, embeddings, TTS) and the character driver land in later phases.
+ * IMPORTANT: keep this import path free of node-only code (the Anthropic/OpenAI
+ * SDKs, `process`, `fetch`, `atob`). The LLM/embeddings/TTS providers and their
+ * factories live behind the `@wren/shared/providers` subpath export so the web
+ * bundle never pulls them in. See packages/shared/src/providers.ts.
+ *
+ * Provider *type* contracts are safe to re-export here (types erase at build);
+ * the character driver (Phase 6) will also live on this barrel.
  */
+
 export const SHARED_OK = true;
+
+export type { LLMMessage, LLMCompleteArgs, LLMProvider } from './llm/types.js';
+export type { EmbeddingsProvider } from './embeddings/types.js';
+export type { TTSWord, TTSResult, TTSChunk, TTSProvider } from './tts/types.js';
