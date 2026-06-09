@@ -1,0 +1,90 @@
+// Prisma schema for the Wren API.
+//
+// Pinned to Prisma 6.x with the legacy `prisma-client-js` generator so the client
+// generates into node_modules/@prisma/client and is imported as `@prisma/client`
+// (the standard pattern for pgvector behind Prisma). The datasource URL
+// is read from the environment (DATABASE_URL); the Prisma CLI is fed the repo-root
+// .env via dotenv-cli (see the db:* scripts in package.json).
+//
+// pgvector note: Prisma does NOT query the `vector` type through normal model
+// queries. The `embedding` column on Chunk is declared as Unsupported(...) so the
+// schema stays in sync, but it is added by a RAW SQL migration and all vector
+// inserts/searches use $executeRaw/$queryRaw with the `<=>` cosine operator.
+// See the notes in db/vector.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String     @id @default(cuid())
+  name      String
+  persona   Persona?
+  documents Document[]
+  sessions  Session[]
+  createdAt DateTime   @default(now())
+}
+
+model Persona {
+  id           String  @id @default(cuid())
+  tenantId     String  @unique
+  tenant       Tenant  @relation(fields: [tenantId], references: [id])
+  name         String // "Maya"
+  systemPrompt String // see apps/api/src/prompt/persona.ts (finalized in Phase 5)
+  voiceId      String? // ElevenLabs voice id
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  title     String
+  source    String?
+  chunks    Chunk[]
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model Chunk {
+  id         String   @id @default(cuid())
+  tenantId   String // denormalized for fast tenant-scoped vector search
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id])
+  content    String
+  // Added by a RAW SQL migration (CREATE EXTENSION vector; ALTER TABLE ... ADD
+  // COLUMN; CREATE INDEX ... hnsw). Declared Unsupported so the schema stays in
+  // sync, but NEVER queried via the Prisma model API — use $queryRaw/$executeRaw
+  // with the `<=>` cosine operator. Dimension (1536) MUST match the embeddings
+  // provider's dimension.
+  embedding  Unsupported("vector(1536)")?
+
+  @@index([tenantId])
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  messages  Message[]
+  createdAt DateTime  @default(now())
+
+  @@index([tenantId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id])
+  role      String // "user" | "assistant"
+  content   String
+  emotion   String? // parsed emotion tag for assistant turns
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+}
