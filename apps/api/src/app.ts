@@ -3,6 +3,7 @@ import express, { type Express } from "express";
 
 import { env } from "./env.js";
 import { errorHandler, notFound } from "./middleware/error.js";
+import { chatRouter } from "./routes/chat.js";
 import { healthRouter } from "./routes/health.js";
 import { ingestRouter } from "./routes/ingest.js";
 
@@ -25,6 +26,7 @@ export function createApp(): Express {
   // Routes. Registered after JSON body parsing, before notFound/errorHandler.
   app.use(healthRouter);
   app.use(ingestRouter);
+  app.use(chatRouter);
 
   // 404 then centralized error handler must be registered last.
   app.use(notFound);

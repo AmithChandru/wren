@@ -15,3 +15,14 @@ export const SHARED_OK = true;
 export type { LLMMessage, LLMCompleteArgs, LLMProvider } from './llm/types.js';
 export type { EmbeddingsProvider } from './embeddings/types.js';
 export type { TTSWord, TTSResult, TTSChunk, TTSProvider } from './tts/types.js';
+
+// Chat API contracts (POST /api/chat). Pure types + the EMOTIONS const (a plain
+// string array — browser-safe, no node code).
+export { EMOTIONS } from './chat/types.js';
+export type {
+  Emotion,
+  VisemeEvent,
+  ChatAudio,
+  ChatRequest,
+  ChatResponse,
+} from './chat/types.js';

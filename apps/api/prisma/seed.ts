@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 
 import { DEMO_TENANT_ID } from "../src/db/constants.js";
+import { MAYA_SYSTEM_PROMPT } from "../src/prompt/persona.js";
 
 // Make this script self-sufficient when run directly (e.g. `tsx prisma/seed.ts`).
 // This file lives at apps/api/prisma/seed.ts, so the repo-root .env is THREE
@@ -38,8 +39,9 @@ async function main(): Promise<void> {
     create: {
       tenantId: tenant.id,
       name: "Maya",
-      // Placeholder prompt; finalized in Phase 5 (apps/api/src/prompt/persona.ts).
-      systemPrompt: "You are Maya, a friendly, encouraging EdTech tutor.",
+      // Canonical Maya persona (apps/api/src/prompt/persona.ts). The update branch
+      // stays a no-op so re-seeds never clobber an operator's persona edits.
+      systemPrompt: MAYA_SYSTEM_PROMPT,
       voiceId: null,
     },
   });
