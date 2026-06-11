@@ -25,8 +25,14 @@ const envSchema = z.object({
   // Phase 2 (rag-engineer) makes this required when Prisma is wired.
   DATABASE_URL: z.string().url().optional(),
 
-  // NOTE: Provider keys (LLM/embeddings/TTS) and the admin secret are added in
-  // Phase 3/4. They are intentionally NOT defined here yet.
+  // Admin secret guarding write/admin ops (currently POST /api/ingest). OPTIONAL so
+  // the app still boots with zero configuration. When UNSET, the ingest route fails
+  // CLOSED (503) rather than running unauthenticated. A min length avoids an empty
+  // string passing as "configured". Never logged or echoed.
+  ADMIN_API_SECRET: z.string().min(1).optional(),
+
+  // NOTE: Provider keys (LLM/embeddings/TTS) live in the shared provider factories
+  // and are read from process.env there, not validated here.
 });
 
 const parsed = envSchema.safeParse(process.env);

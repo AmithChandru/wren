@@ -1,11 +1,11 @@
 {
-  // Type-checks the Prisma seed script, which lives outside `src` (and so outside
-  // the main build's rootDir). Checked by the `typecheck` script; never emitted —
-  // the seed runs via tsx, not the compiled output.
+  // Type-checks the out-of-`src` scripts (the Prisma seed and the standalone
+  // tooling under scripts/, e.g. ingest-sample). Checked by the `typecheck` script;
+  // never emitted — these run via tsx, not the compiled output.
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["prisma/seed.ts"]
+  "include": ["prisma/seed.ts", "scripts/**/*.ts"]
 }

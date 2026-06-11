@@ -16,7 +16,8 @@
     "db:migrate:create": "dotenv -e ../../.env -- prisma migrate dev --create-only",
     "db:reset": "dotenv -e ../../.env -- prisma migrate reset",
     "db:seed": "dotenv -e ../../.env -- prisma db seed",
-    "db:studio": "dotenv -e ../../.env -- prisma studio"
+    "db:studio": "dotenv -e ../../.env -- prisma studio",
+    "ingest:sample": "dotenv -e ../../.env -- tsx scripts/ingest-sample.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
