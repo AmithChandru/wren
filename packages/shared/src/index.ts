@@ -6,8 +6,9 @@
  * factories live behind the `@wren/shared/providers` subpath export so the web
  * bundle never pulls them in. See packages/shared/src/providers.ts.
  *
- * Provider *type* contracts are safe to re-export here (types erase at build);
- * the character driver (Phase 6) will also live on this barrel.
+ * Provider *type* contracts are safe to re-export here (types erase at build).
+ * The character core lives behind the dedicated `@wren/shared/character` subpath
+ * (parallel to `@wren/shared/providers`), not on this general barrel.
  */
 
 export const SHARED_OK = true;
