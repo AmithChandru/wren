@@ -29,5 +29,3 @@ pnpm-debug.log*
 # editor
 .vscode/
 .idea/
-
-# (Files committed before that date remain in history; the tip no longer tracks them.)

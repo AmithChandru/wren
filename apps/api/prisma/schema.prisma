@@ -10,7 +10,7 @@
 // queries. The `embedding` column on Chunk is declared as Unsupported(...) so the
 // schema stays in sync, but it is added by a RAW SQL migration and all vector
 // inserts/searches use $executeRaw/$queryRaw with the `<=>` cosine operator.
-// See the notes in db/vector.ts.
+// Vectors are handled in raw SQL; see the notes in db/vector.ts.
 
 generator client {
   provider = "prisma-client-js"

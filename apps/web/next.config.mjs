@@ -21,7 +21,7 @@ config({ path: path.resolve(here, "../../.env") });
 const clientEnv = {};
 
 /**
- * CHARACTER_RENDERER is the name the documented name, so it WINS.
+ * CHARACTER_RENDERER is the documented name, so it WINS.
  * NEXT_PUBLIC_CHARACTER_RENDERER is only the transport Next requires to expose a value to
  * the browser. Preferring the prefixed one would mean editing the documented knob appears
  * to do nothing whenever a stale prefixed copy exists — which is exactly what happened.
