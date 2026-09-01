@@ -72,6 +72,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@rive-app/react-canvas':
+        specifier: ^4.32.0
+        version: 4.32.0(react@19.2.0)
       '@wren/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -97,6 +100,9 @@ importers:
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.5.15)
+      dotenv:
+        specifier: 17.4.2
+        version: 17.4.2
       eslint:
         specifier: 9.39.4
         version: 9.39.4(jiti@1.21.7)
@@ -623,6 +629,14 @@ packages:
 
   '@prisma/get-platform@6.19.3':
     resolution: {integrity: sha512-xFj1VcJ1N3MKooOQAGO0W5tsd0W2QzIvW7DD7c/8H14Zmp4jseeWAITm+w2LLoLrlhoHdPPh0NMZ8mfL6puoHA==}
+
+  '@rive-app/canvas@2.40.0':
+    resolution: {integrity: sha512-TIZsYC+LoOg7NfF9pQZ5dyAQjkJdiyCisKDYqk11nc29qYzzLz79ybdyCOIBJ4dzgqsVKsC3Wtuw+YII0dg3uQ==}
+
+  '@rive-app/react-canvas@4.32.0':
+    resolution: {integrity: sha512-3r+9xZmdPZTLGNhHq3QuFKVtkPCRnpx6icSqIRUnpGDOmA1U3eADb2crSuwh9voXtHJ0ddexagF+zYmSIC+1ug==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
@@ -2887,6 +2901,13 @@ snapshots:
   '@prisma/get-platform@6.19.3':
     dependencies:
       '@prisma/debug': 6.19.3
+
+  '@rive-app/canvas@2.40.0': {}
+
+  '@rive-app/react-canvas@4.32.0(react@19.2.0)':
+    dependencies:
+      '@rive-app/canvas': 2.40.0
+      react: 19.2.0
 
   '@rtsao/scc@1.1.0': {}
 

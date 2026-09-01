@@ -6,6 +6,7 @@
 // by req.tenantId. A session is loaded with `AND tenantId`, so a session created
 // under tenant A is never readable by tenant B.
 
+import { buildVisemeTimeline } from "@wren/shared/character";
 import { getLLM, getTTS, type LLMMessage } from "@wren/shared/providers";
 import type { ChatRequest, ChatResponse } from "@wren/shared";
 
@@ -80,9 +81,15 @@ export async function chat(req: ChatRequest): Promise<ChatResponse> {
   //    degrade to text-only (omit `audio`) per the architecture notes. No secrets
   //    are logged (the provider error, not credentials).
   let audio: ChatResponse["audio"];
+  let visemes: ChatResponse["visemes"];
   try {
     const result = await getTTS().synthesize(text, persona?.voiceId ?? undefined);
     audio = { mime: result.mime, base64: Buffer.from(result.bytes).toString("base64") };
+    // Providers that report word timings (ElevenLabs) let us ship a REAL viseme timeline
+    // instead of leaving the client to assume a constant speaking rate. Providers that
+    // don't (the mock) yield an empty timeline, and the client falls back to the estimate.
+    const timeline = buildVisemeTimeline(text, result.words ?? []);
+    if (timeline.length > 0) visemes = timeline;
   } catch (err) {
     console.error("[chat] TTS failed, returning text-only:", err);
   }
@@ -107,6 +114,13 @@ export async function chat(req: ChatRequest): Promise<ChatResponse> {
     return sid;
   });
 
-  // 9. Respond. `visemes` is intentionally omitted — the client derives them.
-  return { sessionId, emotion, text, ...(audio ? { audio } : {}) };
+  // 9. Respond. `visemes` carries the measured timeline when the TTS provider reported
+  //    word timings; it is omitted otherwise so the client knows to estimate.
+  return {
+    sessionId,
+    emotion,
+    text,
+    ...(audio ? { audio } : {}),
+    ...(visemes ? { visemes } : {}),
+  };
 }

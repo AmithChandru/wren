@@ -31,6 +31,10 @@ export {
 // Expression presets.
 export { EXPRESSIONS } from "./expressions.js";
 
+// Real-timing viseme timeline built from TTS word timings.
+export { buildVisemeTimeline } from "./timeline.js";
+export type { TimedWord, TimedViseme } from "./timeline.js";
+
 // The timer-driven speech driver.
 export { createSpeechDriver } from "./driver.js";
 export type { SpeechDriverOptions } from "./driver.js";

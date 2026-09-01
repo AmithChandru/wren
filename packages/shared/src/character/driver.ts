@@ -1,7 +1,10 @@
 /**
  * character/driver.ts — the timer-driven, renderer-agnostic speech driver.
  *
- * Browser-safe:
+ * One deliberate
+ * deviation, marked inline: the reference clamps the viseme pointer to the last character,
+ * which leaves the mouth frozen in that shape after the words run out. We emit REST
+ * instead. Browser-safe:
  * uses `performance.now()` + `setTimeout` (global in node + browser), never `window`,
  * `document`, or `requestAnimationFrame` (those live in the renderer).
  *
@@ -10,6 +13,7 @@
  * return to REST on `stop()` or the maxMs backstop.
  */
 import { buildVisemeSequence, clamp, REST } from "./visemes.js";
+import type { TimedViseme } from "./timeline.js";
 import type { VisemeSink } from "./types.js";
 
 export interface SpeechDriverOptions {
@@ -22,6 +26,13 @@ export interface SpeechDriverOptions {
   getElapsedMs?: () => number;
   /** Optional max duration backstop (ms) so the turn always ends. */
   maxMs?: number;
+  /**
+   * Real viseme timeline from the TTS provider's measured word timings. When present the
+   * mouth follows THIS against the audio clock rather than the assumed `cadence`, which
+   * is the difference between lip-sync that tracks the voice and lip-sync that drifts.
+   * Pair it with `getElapsedMs` reading `audioEl.currentTime`.
+   */
+  timeline?: readonly TimedViseme[];
 }
 
 /**
@@ -41,17 +52,40 @@ export function createSpeechDriver(sink: VisemeSink, text: string, opts: SpeechD
   let onDone: (() => void) | null = null;
   let running = false;
 
+  const timeline = opts.timeline;
+  const hasTimeline = !!timeline && timeline.length > 0;
+  /** Index into `timeline`; monotonic, so this is a walk rather than a search per frame. */
+  let cue = 0;
+
   const tick = () => {
     if (!running) return;
     const elapsed = opts.getElapsedMs ? opts.getElapsedMs() : performance.now() - started;
-    pointer = Math.max(pointer, Math.floor((elapsed / 1000) * cadence));
-    sink.setViseme(seq[clamp(pointer, 0, total - 1)] ?? REST);
-    timer = setTimeout(tick, 70 + Math.random() * 30);
+
+    if (hasTimeline) {
+      // Follow the measured timeline against the audio clock. Advance while the NEXT cue
+      // is already due, so a stalled or seeking audio element cannot desynchronise us.
+      while (cue + 1 < timeline.length && timeline[cue + 1]!.t * 1000 <= elapsed) cue += 1;
+      sink.setViseme(timeline[cue]!.viseme);
+    } else {
+      pointer = Math.max(pointer, Math.floor((elapsed / 1000) * cadence));
+      // Past the end of the text the mouth must CLOSE, not hold the final character's
+      // shape. Clamping to `total - 1` freezes the face
+      // open whenever a reply ends on a vowel, and it stays open for the rest of the audio
+      // because nothing else writes a viseme until stop().
+      sink.setViseme(pointer >= total ? REST : (seq[pointer] ?? REST));
+    }
+
+    // A timeline carries real onsets, so sample faster to land on them; the estimated
+    // path keeps the reference's jittered ~85ms so it does not look mechanical.
+    timer = setTimeout(tick, hasTimeline ? 33 : 70 + Math.random() * 30);
   };
 
   return {
     /** Snap the pointer to a known character index (from TTS/boundary timestamps). */
     syncTo(charIndex: number) {
+      // No-op in timeline mode: the timeline IS the truth, and nudging a character
+      // pointer would fight it.
+      if (hasTimeline) return;
       if (Number.isFinite(charIndex)) pointer = Math.max(pointer, Math.floor(charIndex));
     },
     start(done?: () => void) {
@@ -60,7 +94,10 @@ export function createSpeechDriver(sink: VisemeSink, text: string, opts: SpeechD
       started = performance.now();
       sink.setTalking(true);
       tick();
-      backstop = setTimeout(() => this.stop(), opts.maxMs ?? estMs * 1.5 + 1500);
+      // With a timeline the true end is known, so the anti-hang net can be tight and
+      // honest instead of a guess scaled off the text length.
+      const timelineMs = hasTimeline ? timeline[timeline.length - 1]!.t * 1000 + 1500 : null;
+      backstop = setTimeout(() => this.stop(), opts.maxMs ?? timelineMs ?? estMs * 1.5 + 1500);
     },
     stop() {
       if (!running) return;

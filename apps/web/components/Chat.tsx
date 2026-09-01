@@ -98,39 +98,53 @@ export function Chat({ character }: ChatProps) {
 
     character.current?.setExpression(reply.emotion);
 
+    // Decode the audio FIRST so the driver can read its clock. atob/Blob can throw on a
+    // malformed payload, so on ANY failure we fall through to the timer-only (muted)
+    // path — the mouth still animates.
+    let audioEl: HTMLAudioElement | undefined;
+    let url: string | undefined;
+    if (reply.audio?.base64) {
+      try {
+        url = base64ToBlobUrl(reply.audio.base64, reply.audio.mime);
+        audioEl = new Audio(url);
+      } catch {
+        url = undefined;
+        audioEl = undefined;
+      }
+    }
+
+    // Prefer the REAL timeline the backend measured from the TTS word timings, played
+    // against the audio's own clock. Only fall back to the assumed cadence when the
+    // provider reported no timings (the mock) or audio failed to decode — an estimated
+    // rate drifts against real speech, which is what makes lip-sync look approximate.
+    const timeline = audioEl && reply.visemes?.length ? reply.visemes : undefined;
+    const el = audioEl;
+
     const driver = createSpeechDriver(
       {
         setViseme: (v) => character.current?.setViseme(v),
         setTalking: (t) => character.current?.setTalking(t),
       },
       reply.text,
-      // Pass the cadence explicitly so the syncTo conversion below and the driver's
-      // internal wall-clock advance are provably the same number, and the mouth budget
-      // explicitly so a long reply is never truncated (see mouthBudgetMs).
-      { cadence: CADENCE, maxMs: mouthBudgetMs(reply.text) },
+      {
+        // Cadence still matters for the fallback path and the syncTo conversion below.
+        cadence: CADENCE,
+        maxMs: mouthBudgetMs(reply.text),
+        ...(timeline ? { timeline, getElapsedMs: () => (el ? el.currentTime * 1000 : 0) } : {}),
+      },
     );
-    const turn: Turn = { driver, done: false };
+    const turn: Turn = { driver, done: false, audioEl, url };
 
-    // Decode + wire the audio. atob/Blob can throw on a malformed payload, so on ANY
-    // failure we fall through to the timer-only (muted) path — the mouth still animates.
-    if (reply.audio?.base64) {
-      try {
-        const url = base64ToBlobUrl(reply.audio.base64, reply.audio.mime);
-        const audioEl = new Audio(url);
-        turn.url = url;
-        turn.audioEl = audioEl;
-        // Forward-snap the mouth to the real audio position. The driver ratchets
-        // forward only (Math.max) — it won't pull the mouth back, which is fine for a
-        // stylized face; the wall clock keeps it moving if audio is blocked/delayed.
+    if (audioEl) {
+      // Without a timeline, nudge the estimate forward from the real audio position.
+      // With one, the driver reads currentTime every tick and syncTo is a no-op.
+      if (!timeline) {
         audioEl.addEventListener("timeupdate", () => driver.syncTo(audioEl.currentTime * CADENCE));
-        audioEl.addEventListener("ended", () => teardown(turn));
-        // A media error must NOT end the turn: drop the audio and let the timer-driven
-        // driver carry on, which is the muted fallback this file's contract promises.
-        audioEl.addEventListener("error", () => dropAudio(turn));
-      } catch {
-        turn.url = undefined;
-        turn.audioEl = undefined;
       }
+      audioEl.addEventListener("ended", () => teardown(turn));
+      // A media error must NOT end the turn: drop the audio and let the timer-driven
+      // driver carry on, which is the muted fallback this file's contract promises.
+      audioEl.addEventListener("error", () => dropAudio(turn));
     }
 
     activeTurn.current = turn;
