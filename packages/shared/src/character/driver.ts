@@ -1,10 +1,9 @@
 /**
  * character/driver.ts — the timer-driven, renderer-agnostic speech driver.
  *
- * One deliberate
- * deviation, marked inline: the reference clamps the viseme pointer to the last character,
- * which leaves the mouth frozen in that shape after the words run out. We emit REST
- * instead. Browser-safe:
+ * One deliberate behaviour, marked inline: rather than clamping the viseme pointer to the
+ * last character — which leaves the mouth frozen in that shape after the words run out —
+ * we emit REST. Browser-safe:
  * uses `performance.now()` + `setTimeout` (global in node + browser), never `window`,
  * `document`, or `requestAnimationFrame` (those live in the renderer).
  *
@@ -69,7 +68,7 @@ export function createSpeechDriver(sink: VisemeSink, text: string, opts: SpeechD
     } else {
       pointer = Math.max(pointer, Math.floor((elapsed / 1000) * cadence));
       // Past the end of the text the mouth must CLOSE, not hold the final character's
-      // shape. Clamping to `total - 1` freezes the face
+      // shape. Clamping to `total - 1` would freeze the face
       // open whenever a reply ends on a vowel, and it stays open for the rest of the audio
       // because nothing else writes a viseme until stop().
       sink.setViseme(pointer >= total ? REST : (seq[pointer] ?? REST));

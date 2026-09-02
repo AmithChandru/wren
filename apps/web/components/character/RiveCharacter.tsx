@@ -9,7 +9,7 @@
  *   https://rive.app/marketplace/21097-39950-custom-talking-avatar-real-time-lip-sync-for-your-app/
  * CC BY REQUIRES VISIBLE ATTRIBUTION wherever this ships. See the credit in app/page.tsx.
  *
- * The asset does NOT satisfy the ideal contract in the renderer contract (a `main`
+ * The asset does NOT satisfy the ideal renderer contract (a `main`
  * state machine with `mouthShape` / `expression` / `isTalking` / gaze inputs). Verified by
  * enumerating it with the Rive runtime, it exposes exactly one usable input:
  *

@@ -1,6 +1,6 @@
 import type { TTSProvider, TTSResult, TTSWord } from './types.js';
 
-/** Mock speaking rate ~13 chars/s, roughly a natural speaking pace. */
+/** Mock speaking rate: ~13 chars/s, roughly a natural speaking pace. */
 const CHARS_PER_SECOND = 13;
 const SAMPLE_RATE = 16000; // mono PCM16
 

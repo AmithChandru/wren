@@ -7,9 +7,8 @@
  * A requestAnimationFrame loop eases current values toward targets and paints the SVG.
  * Drive it with createSpeechDriver() from the shared character module.
  *
- * Renderer notes: the only
- * change is the import path (`@wren/shared/character`) and the handle type, which is the
- * shared `CharacterRenderer` interface.
+ * The handle type is the shared `CharacterRenderer` interface, so this and the Rive
+ * renderer are interchangeable behind the same ref.
  */
 import { forwardRef, useImperativeHandle, useEffect, useRef } from "react";
 import {

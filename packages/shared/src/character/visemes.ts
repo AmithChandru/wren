@@ -2,8 +2,8 @@
  * character/visemes.ts — the viseme table, char->viseme mapping, the parametric
  * mouth-path builder, and small math helpers. Renderer-agnostic, browser-safe.
  *
- * The viseme
- * INDICES are a contract shared with the Rive .riv asset — do not renumber them.
+ * The viseme INDICES are a contract shared with the Rive .riv asset — do not renumber
+ * them.
  */
 import type { VisemeShape } from "./types.js";
 

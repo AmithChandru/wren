@@ -2,7 +2,7 @@
 //
 // Prisma does NOT query the `vector` type through its normal model API, so every
 // vector insert/search goes through $executeRaw/$queryRaw with the `<=>` cosine
-// operator. 
+// operator.
 //
 // HARD RULES (enforced here, flagged by code-reviewer if violated):
 //  - searchChunks is ALWAYS tenant-scoped (`WHERE "tenantId" = ...`). No query may

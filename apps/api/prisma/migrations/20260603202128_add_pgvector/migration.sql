@@ -2,7 +2,7 @@
 --
 -- Order matters: the `vector` type must exist before the column that uses it, so
 -- CREATE EXTENSION runs first. Prisma generated only the ADD COLUMN line; the
--- extension and index are added by hand by hand. All
+-- extension and index are added by hand. All
 -- statements use IF NOT EXISTS guards so the migration is safe to re-run.
 --
 -- The embedding dimension (1536) MUST match the embeddings provider's dimension

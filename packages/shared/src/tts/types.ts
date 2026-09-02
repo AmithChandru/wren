@@ -1,6 +1,5 @@
 /**
- * TTS provider interface. See the architecture notes "Provider interfaces" and the
- * the TTS notes.
+ * TTS provider interface. See the architecture notes "Provider interfaces".
  *
  * `words` timestamps (seconds) tighten lip-sync — the speech driver snaps the
  * mouth to the true audio position instead of estimating.

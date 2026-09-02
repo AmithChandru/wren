@@ -6,7 +6,7 @@
  * already returns per-word timings, so the correct clock is available — this maps them
  * onto the viseme sequence.
  *
- * Word granularity, per the alignment notes: character counts and sound counts
+ * Word granularity: character counts and sound counts
  * do not line up ("knight" is 6 letters, 3 sounds), so distributing a whole utterance
  * proportionally puts onsets in the wrong place. Distributing WITHIN each word keeps every
  * word anchored to its own measured start and end.
